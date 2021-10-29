@@ -231,12 +231,12 @@ class ChainReaction:
         container.add_atom_at(row, column, color)  
     
     def get_thing_at(self, row, column) -> List[int]:
-        if not 0 < int(row) < self.row:
+        if not 0 < int(row) < self.board.row:
             raise ValueError(f'row must only be in 0-{self.row}')
-        elif not 0 < int(column) < self.column:
+        elif not 0 < int(column) < self.board.column:
             raise ValueError(f'column  must only be in 0-{self.column}')
          
-        return self.board[row][column]
+        return self.board.board[int(row)][int(column)]
     
     def is_valid_index(self, y, x):
         if int(y) <= self.board.row <=0:

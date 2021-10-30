@@ -58,18 +58,12 @@ class Container:
         self.color = color
 
     def add_item(self, color: Color) -> None:
-        self += 1
+        self.item_count += 1
         self.color = color
 
     def should_explode(self) -> bool:
         return self.item_count > self.item_limit
 
-    def __add__(self, x: int) -> None:
-        self.item_count += x
-
-    def __sub__(self, x: int) -> None:
-        self.item_count -= x
-    
     def __repr__(self) -> str:
         return str(self.item_limit)
 
@@ -197,7 +191,8 @@ class ChainReaction:
         self.players = players 
         self._current_player_index = 0
         self._max_index = len_players - 1
-
+        self.number_of_turn = 0
+    
     @property
     def current_player(self):
         return self.players[self._current_player_index]
@@ -220,6 +215,7 @@ class ChainReaction:
         return moves
     
     def update_player_index(self):
+        print('updating player index')
         index = self._current_player_index + 1
         if index >= self._max_index:
             self._current_player_index = 0
@@ -228,13 +224,13 @@ class ChainReaction:
     
     def add_atom(self, row, column, color):
         container = self.get_thing_at(row, column)
-        container.add_atom_at(row, column, color)  
+        container.add_item(color)  
     
     def get_thing_at(self, row, column) -> List[int]:
-        if not 0 < int(row) < self.board.row:
-            raise ValueError(f'row must only be in 0-{self.row}')
-        elif not 0 < int(column) < self.board.column:
-            raise ValueError(f'column  must only be in 0-{self.column}')
+        if not (0 <= int(row) <= self.board.row):
+            raise ValueError(f'row must only be in 0-{self.board.row}')
+        elif not (0 <= int(column) <= self.board.column):
+            raise ValueError(f'column  must only be in 0-{self.board.column}')
          
         return self.board.board[int(row)][int(column)]
     
@@ -252,6 +248,7 @@ class ChainReaction:
         print(str(self.board))          
 
     def win(self, player):
+        print(f"{player} has won")
         return player
 
     def get_current_player_choices(self):
@@ -288,13 +285,13 @@ class ChainReaction:
             # update board
             self.add_atom(y, x, current_player.color)
             color = self.board.get_existing_color()
-            for player in self.player:
+            for player in self.players:
                 if player.color not in color:
                     self.eliminate_player(player)
 
             # check if win
-            if len(color) == 1:
-                self.win()
+            if self.number_of_turn >= len(self.players) and len(color) == 1:
+                self.win(current_player)
                 is_playing=False
                 break
            
@@ -304,10 +301,11 @@ class ChainReaction:
             
             # Prevents a forever loop 
             loops_count += 1
-            if loops_count <= 1000:
+            if loops_count >= 1000:
                 print("limit loops has been reached exiting")
                 break
-
+            
+            self.number_of_turn += 1
 
 def temporary_make_players():
     return [
@@ -325,3 +323,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
